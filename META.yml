@@ -1,0 +1,24 @@
+---
+abstract: 'use JSON::MaybeXS as the JSON encoder for Mojolicious'
+author:
+  - 'Dan Book <dbook@cpan.org>'
+build_requires:
+  Scalar::Util: '0'
+  Test::More: '0.88'
+configure_requires:
+  ExtUtils::MakeMaker: '0'
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.143240'
+license: artistic_2
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: '1.4'
+name: Mojo-JSON-MaybeXS
+requires:
+  JSON::MaybeXS: '1.001'
+  Mojolicious: '5.66'
+resources:
+  bugtracker: https://github.com/Grinnz/Mojo-JSON-MaybeXS/issues
+  homepage: https://github.com/Grinnz/Mojo-JSON-MaybeXS
+  repository: https://github.com/Grinnz/Mojo-JSON-MaybeXS.git
+version: '0.001'
