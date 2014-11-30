@@ -25,9 +25,10 @@ my %WriteMakefileArgs = (
   },
   "TEST_REQUIRES" => {
     "Scalar::Util" => 0,
-    "Test::More" => "0.88"
+    "Test::More" => "0.88",
+    "Test::Without::Module" => "0.17"
   },
-  "VERSION" => "0.001",
+  "VERSION" => "0.002",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -39,7 +40,8 @@ my %FallbackPrereqs = (
   "JSON::MaybeXS" => "1.001",
   "Mojolicious" => "5.66",
   "Scalar::Util" => 0,
-  "Test::More" => "0.88"
+  "Test::More" => "0.88",
+  "Test::Without::Module" => "0.17"
 );
 
 

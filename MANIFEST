@@ -7,4 +7,7 @@ Makefile.PL
 README
 dist.ini
 lib/Mojo/JSON/MaybeXS.pm
+t/cpanel.t
 t/json.t
+t/pp.t
+t/xs.t
