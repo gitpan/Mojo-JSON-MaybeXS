@@ -3,10 +3,10 @@ package Mojo::JSON::MaybeXS;
 use strict;
 use warnings;
 use Mojo::Util 'monkey_patch';
-use Mojo::JSON;
-use JSON::MaybeXS;
+use JSON::MaybeXS 'JSON';
+use Mojo::JSON ();
 
-our $VERSION = 0.002;
+our $VERSION = 0.003;
 
 my $BINARY = JSON::MaybeXS->new(utf8 => 1, allow_nonref => 1,
 	allow_blessed => 1, convert_blessed => 1);
@@ -74,9 +74,9 @@ L<Mojo::JSON> will stringify the object.
 
 L<JSON::MaybeXS> does not allow unblessed references other than hash and array
 references or references to the integers C<0> and C<1>, and will throw an
-exception if attempting to encode one. L<Mojo::JSON> will treat scalar
-references as references to C<0> or C<1> and will encode them to C<true> or
-C<false>.
+exception if attempting to encode one. L<Mojo::JSON> will treat all scalar
+references the same as references to C<0> or C<1> and will encode them to
+C<true> or C<false> depending on their boolean value.
 
  print encode_json([\'asdf']);
  # Mojo::JSON: [true]
