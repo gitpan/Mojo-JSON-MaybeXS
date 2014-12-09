@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-
+use 5.010001;
 
 use ExtUtils::MakeMaker;
 
@@ -18,6 +18,7 @@ my %WriteMakefileArgs = (
   "DISTNAME" => "Mojo-JSON-MaybeXS",
   "EXE_FILES" => [],
   "LICENSE" => "artistic_2",
+  "MIN_PERL_VERSION" => "5.010001",
   "NAME" => "Mojo::JSON::MaybeXS",
   "PREREQ_PM" => {
     "JSON::MaybeXS" => "1.001",
@@ -27,7 +28,7 @@ my %WriteMakefileArgs = (
     "Scalar::Util" => 0,
     "Test::More" => "0.88"
   },
-  "VERSION" => "0.004",
+  "VERSION" => "0.005",
   "test" => {
     "TESTS" => "t/*.t"
   }

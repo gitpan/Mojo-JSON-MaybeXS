@@ -6,12 +6,12 @@ use Mojo::Util 'monkey_patch';
 use JSON::MaybeXS 'JSON';
 use Mojo::JSON ();
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 
 my $BINARY = JSON::MaybeXS->new(utf8 => 1, allow_nonref => 1,
-	allow_blessed => 1, convert_blessed => 1);
+	allow_unknown => 1, allow_blessed => 1, convert_blessed => 1);
 my $TEXT = JSON::MaybeXS->new(utf8 => 0, allow_nonref => 1,
-	allow_blessed => 1, convert_blessed => 1);
+	allow_unknown => 1, allow_blessed => 1, convert_blessed => 1);
 
 monkey_patch 'Mojo::JSON', 'encode_json', sub { $BINARY->encode(shift) };
 monkey_patch 'Mojo::JSON', 'decode_json', sub { $BINARY->decode(shift) };
@@ -31,6 +31,9 @@ Mojo::JSON::MaybeXS - use JSON::MaybeXS as the JSON encoder for Mojolicious
  use Mojo::JSON::MaybeXS;
  use Mojo::JSON qw/encode_json decode_json true false/;
  
+ use Mojo::JSON::MaybeXS;
+ use Mojolicious::Lite;
+ 
  package My::Mojo::App;
  use Mojo::JSON::MaybeXS;
  use Mojo::Base 'Mojolicious';
@@ -38,15 +41,29 @@ Mojo::JSON::MaybeXS - use JSON::MaybeXS as the JSON encoder for Mojolicious
 =head1 DESCRIPTION
 
 L<Mojo::JSON::MaybeXS> is a monkey-patch module for using L<JSON::MaybeXS> in
-place of L<Mojo::JSON> in a L<Mojolicious> application. It must be loaded
-before L<Mojo::JSON> so the new functions will be properly exported.
+place of L<Mojo::JSON> in a L<Mojolicious> application, or in a standalone
+capacity. It must be loaded before L<Mojo::JSON> so the new functions will be
+properly exported.
 
 =head1 CAVEATS
 
-L<JSON::MaybeXS> may load different modules depending on what is available, and
-these modules have slightly different behavior from L<Mojo::JSON> and
-occasionally from each other. As of this writing, the author has found the
-following incompatibilities:
+L<JSON::MaybeXS> may load different modules behind the scenes depending on what
+is available, and these modules have slightly different behavior from
+L<Mojo::JSON> and occasionally from each other. References to the behavior of
+L<JSON::MaybeXS> below are actually describing the behavior shared among the
+modules it loads.
+
+L<JSON::MaybeXS> is used with the options C<allow_nonref>, C<allow_unknown>,
+C<allow_blessed>, and C<convert_blessed>. C<allow_nonref> allows encoding and
+decoding of bare values outside of hash/array references, since L<Mojo::JSON>
+does not prevent this, in accordance with
+L<RFC 7159|http://tools.ietf.org/html/rfc7159>. The other options prevent the
+encoder from blowing up when encountering values that cannot be represented in
+JSON to better match the behavior of L<Mojo::JSON>; in most cases, where
+L<Mojo::JSON> would stringify a reference, L<JSON::MaybeXS> with these settings
+will encode it to C<null>. See below for more specifics.
+
+As of this writing, the author has found the following incompatibilities:
 
 =head2 Boolean Stringification
 
@@ -72,15 +89,15 @@ L<Mojo::JSON> will stringify the object.
 
 =head2 Unblessed References
 
-L<JSON::MaybeXS> does not allow unblessed references other than hash and array
-references or references to the integers C<0> and C<1>, and will throw an
-exception if attempting to encode one. L<Mojo::JSON> will treat all scalar
-references the same as references to C<0> or C<1> and will encode them to
-C<true> or C<false> depending on their boolean value.
+L<JSON::MaybeXS> does not allow unblessed references other than to hashes,
+arrays, or the scalar values C<0> and C<1>, and will encode them to C<null>.
+L<Mojo::JSON> will treat all scalar references the same as references to C<0>
+or C<1> and will encode them to C<true> or C<false> depending on their boolean
+value. Other references (code, filehandle, etc) will be stringified.
 
- print encode_json([\'asdf']);
- # Mojo::JSON: [true]
- # JSON::MaybeXS: dies
+ print encode_json([\'asdf', sub { 1 }]);
+ # Mojo::JSON: [true,"CODE(0x11d1650)"]
+ # JSON::MaybeXS: [null,null]
 
 =head2 Escapes
 
@@ -88,7 +105,7 @@ L<Mojo::JSON> currently escapes the slash character C</> for security reasons,
 as well as the unicode characters C<u2028> and C<u2029>, while L<JSON::MaybeXS>
 does not. This does not affect decoding of the resulting JSON.
 
- print encode_json(["/\x{2028}/\x{2029"]);
+ print encode_json(["/\x{2028}/\x{2029}"]);
  # Mojo::JSON: ["\/\u2028\/\u2029"]
  # JSON::MaybeXS: ["/ / "]
  # Both decode to arrayref containing: "/\x{2028}/\x{2029}"
