@@ -17,7 +17,7 @@ name: Mojo-JSON-MaybeXS
 provides:
   Mojo::JSON::MaybeXS:
     file: lib/Mojo/JSON/MaybeXS.pm
-    version: '0.005'
+    version: '0.006'
 requires:
   JSON::MaybeXS: '1.001'
   Mojolicious: '5.66'
@@ -26,4 +26,4 @@ resources:
   bugtracker: https://github.com/Grinnz/Mojo-JSON-MaybeXS/issues
   homepage: https://github.com/Grinnz/Mojo-JSON-MaybeXS
   repository: https://github.com/Grinnz/Mojo-JSON-MaybeXS.git
-version: '0.005'
+version: '0.006'

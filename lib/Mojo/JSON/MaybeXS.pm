@@ -6,12 +6,14 @@ use Mojo::Util 'monkey_patch';
 use JSON::MaybeXS 'JSON';
 use Mojo::JSON ();
 
-our $VERSION = '0.005';
+our $VERSION = '0.006';
 
 my $BINARY = JSON::MaybeXS->new(utf8 => 1, allow_nonref => 1,
 	allow_unknown => 1, allow_blessed => 1, convert_blessed => 1);
 my $TEXT = JSON::MaybeXS->new(utf8 => 0, allow_nonref => 1,
 	allow_unknown => 1, allow_blessed => 1, convert_blessed => 1);
+my $TRUE = JSON->true;
+my $FALSE = JSON->false;
 
 monkey_patch 'Mojo::JSON', 'encode_json', sub { $BINARY->encode(shift) };
 monkey_patch 'Mojo::JSON', 'decode_json', sub { $BINARY->decode(shift) };
@@ -19,8 +21,8 @@ monkey_patch 'Mojo::JSON', 'decode_json', sub { $BINARY->decode(shift) };
 monkey_patch 'Mojo::JSON', 'to_json',   sub { $TEXT->encode(shift) };
 monkey_patch 'Mojo::JSON', 'from_json', sub { $TEXT->decode(shift) };
 
-monkey_patch 'Mojo::JSON', 'true',  sub () { JSON->true };
-monkey_patch 'Mojo::JSON', 'false', sub () { JSON->false };
+monkey_patch 'Mojo::JSON', 'true',  sub () { $TRUE };
+monkey_patch 'Mojo::JSON', 'false', sub () { $FALSE };
 
 =head1 NAME
 
@@ -65,17 +67,6 @@ will encode it to C<null>. See below for more specifics.
 
 As of this writing, the author has found the following incompatibilities:
 
-=head2 Boolean Stringification
-
-If L<Cpanel::JSON::XS> is loaded by L<JSON::MaybeXS> (the default if available),
-the L<Mojo::JSON/true> and L<Mojo::JSON/false> booleans will stringify to
-C<"true"> and C<"false">. However, when using L<JSON::XS>, or L<JSON::PP>, they
-will stringify to C<"1"> or C<"0">, like in L<Mojo::JSON>.
-
- print Mojo::JSON::false;
- # JSON::XS, JSON::PP, or Mojo::JSON: 0
- # Cpanel::JSON::XS: false
-
 =head2 Object Conversion
 
 Both L<JSON::MaybeXS> and L<Mojo::JSON> will attempt to call the TO_JSON method
@@ -113,25 +104,31 @@ does not. This does not affect decoding of the resulting JSON.
 =head2 inf and nan
 
 L<Mojo::JSON> encodes C<inf> and C<nan> to strings, whereas L<JSON::MaybeXS>
-will encode them as numbers (barewords) producing invalid JSON.
+will encode them differently depending which module is loaded. If it loads
+L<Cpanel::JSON::XS> (the default if available) version 3.0109 or greater, it
+will encode them as C<null> or strings, depending on a compilation option (the
+default is C<null>). However, L<JSON::XS> or L<JSON::PP> will encode them as
+numbers (barewords) producing invalid JSON.
 
  print encode_json([9**9**9, -sin 9**9**9]);
  # Mojo::JSON: ["inf","nan"]
- # JSON::MaybeXS: [inf,nan]
+ # Cpanel::JSON::XS: [null,null] (or ["inf","nan"] if compiled with -DSTRINGIFY_INFNAN)
+ # JSON::XS or JSON::PP: [inf,nan]
 
 =head2 Upgraded Numbers
 
-L<JSON::MaybeXS> will attempt to guess if a value to be encoded is numeric or
-string based on its last usage. Therefore, using a variable containing C<13> in
-a string will cause it to be encoded as C<"13"> even if the variable itself was
-not changed. L<Mojo::JSON> will encode C<13> as C<13> regardless of whether it
-has been used as a string.
+L<JSON::MaybeXS>, if using L<JSON::XS> or L<JSON::PP>, will attempt to guess if
+a value to be encoded is numeric or string based on its last usage. Therefore,
+using a variable containing C<13> in a string will cause it to be encoded as
+C<"13"> even if the variable itself was not changed. L<Mojo::JSON> or
+L<Cpanel::JSON::XS> version 3.0109 or greater will encode C<13> as C<13>
+regardless of whether it has been used as a string.
 
  my ($num1, $num2) = (13, 14);
  my $str = "$num1";
  print encode_json([$num1, $num2, $str]);
- # Mojo::JSON: [13,14,"13"]
- # JSON::MaybeXS: ["13",14,"13"]
+ # Mojo::JSON or Cpanel::JSON::XS: [13,14,"13"]
+ # JSON::XS or JSON::PP: ["13",14,"13"]
 
 =head1 BUGS
 
