@@ -1,3 +1,7 @@
+0.007     2014-12-14 16:49:55-05:00 America/New_York
+  - Added Cpanel::JSON::XS 3.0112 to recommended prereqs
+  - Enabled new Cpanel::JSON::XS stringify_infnan option where supported
+
 0.006     2014-12-12 10:21:25-05:00 America/New_York
   - Preload JSON booleans for true and false subs
   - Updated tests and documentation for Cpanel::JSON::XS 3.0108
